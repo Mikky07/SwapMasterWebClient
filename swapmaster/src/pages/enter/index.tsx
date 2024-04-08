@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from "react";
+import React, { type FC, useEffect, useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -9,8 +9,43 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import { useFormik } from "formik";
+
+interface Values {
+  username?: string;
+  password?: string;
+}
+
+const validate = (values: Values) => {
+  let errors: Values = {}
+
+  if (!values.username) {
+    errors.username = 'Required';
+  } else if (values.username.length > 15) {
+    errors.username = 'Юзернейм не должен превышать 15 символов!';
+  }
+
+  if (!values.password) {
+    errors.password = 'Required';
+  } else if (values.password.length < 8) {
+    errors.password = 'Пароль должен содержать более 8 символов!';
+  }
+
+  return errors;
+};
 
 export const SignIn: FC = () => {
+
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+    validate,
+    onSubmit: values => {
+      alert(JSON.stringify(values, null, 2));
+    }
+  })
 
   return (
     <>
@@ -31,11 +66,7 @@ export const SignIn: FC = () => {
           <Typography component="h1" variant="h5">
             Вход
           </Typography>
-          <Box
-            component="form"
-            noValidate
-            sx={{ mt: 3 }}
-          >
+          <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -45,6 +76,8 @@ export const SignIn: FC = () => {
                   fullWidth
                   id="firstName"
                   label="Логин"
+                  value={formik.values.username}
+                  onChange={formik.handleChange}
                   autoFocus
                 />
               </Grid>
@@ -55,10 +88,11 @@ export const SignIn: FC = () => {
                   name="password"
                   label="Пароль"
                   type="password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
                   id="password"
-                  autoComplete="new-password"
                 />
-              </Grid>
+              </Grid> 
             </Grid>
             <Button
               type="submit"
